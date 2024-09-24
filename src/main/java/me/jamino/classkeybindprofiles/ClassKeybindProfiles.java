@@ -5,9 +5,12 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.toast.SystemToast;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,39 +23,60 @@ import java.util.*;
 import com.wynntils.core.components.Models;
 import com.wynntils.models.character.CharacterModel;
 
+@Environment(EnvType.CLIENT)
 public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
     public static final String MOD_ID = "classkeybindprofiles";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     public static ClassKeybindProfilesConfig config;
     public static final String[] CLASS_TYPES = {"ARCHER", "ASSASSIN", "MAGE", "SHAMAN", "WARRIOR"};
     private static boolean wynntilsLoaded = false;
+    private String lastClass = "NONE";  // Store the last detected class
 
     @Override
     public void onInitializeClient() {
+        // Register the config with AutoConfig
         AutoConfig.register(ClassKeybindProfilesConfig.class, GsonConfigSerializer::new);
         config = AutoConfig.getConfigHolder(ClassKeybindProfilesConfig.class).getConfig();
 
         wynntilsLoaded = FabricLoader.getInstance().isModLoaded("wynntils");
         if (!wynntilsLoaded) {
             LOGGER.warn("Wynntils mod not detected. Class detection will not work.");
+            return;
         }
 
+        // Register a tick event handler to check for class changes
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player != null && client.world != null) {
-                checkAndUpdateKeybinds(client);
+            if (client.player != null) {
+                checkForClassChange(client);
             }
         });
     }
 
-    private void checkAndUpdateKeybinds(MinecraftClient client) {
+    // Method that checks if the player's class has changed
+    private void checkForClassChange(MinecraftClient client) {
         String currentClass = getCurrentClass();
-        if (currentClass != null && !currentClass.equals("NONE")) {
-            Map<String, String> savedProfile = config.getProfile(currentClass);
-            if (savedProfile != null) {
-                updateOptionsFile(savedProfile);
-                client.options.load();
-                client.player.sendMessage(Text.of("Keybind profile updated for " + currentClass), true);
-            }
+        if (!currentClass.equals(lastClass) && !currentClass.equals("NONE")) {
+            // Class has changed, update keybind profile
+            updateKeybindProfile(client, currentClass);
+            lastClass = currentClass;  // Update the lastClass to prevent redundant updates
+        }
+    }
+
+    private void updateKeybindProfile(MinecraftClient client, String currentClass) {
+        Map<String, String> savedProfile = config.getProfile(currentClass);
+        if (savedProfile != null) {
+            updateOptionsFile(savedProfile);
+            client.options.load();
+
+            // Show a toast notification for keybind update
+            client.execute(() -> {
+                SystemToast.add(
+                        client.getToastManager(),
+                        SystemToast.Type.WORLD_BACKUP,  // Use a valid toast type
+                        Text.of("Keybind profile updated"),
+                        Text.of("Keybind profile updated for " + currentClass)
+                );
+            });
         }
     }
 
