@@ -10,14 +10,15 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.toast.SystemToast;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 // Wynntils imports
 import com.wynntils.core.components.Models;
@@ -30,11 +31,12 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
     public static ClassKeybindProfilesConfig config;
     public static final String[] CLASS_TYPES = {"ARCHER", "ASSASSIN", "MAGE", "SHAMAN", "WARRIOR"};
     private static boolean wynntilsLoaded = false;
-    private String lastClass = "NONE";  // Store the last detected class
+    private String lastClass = "NONE";
+    private int tickCounter = 0;
+    private static final int CHECK_INTERVAL = 20;
 
     @Override
     public void onInitializeClient() {
-        // Register the config with AutoConfig
         AutoConfig.register(ClassKeybindProfilesConfig.class, GsonConfigSerializer::new);
         config = AutoConfig.getConfigHolder(ClassKeybindProfilesConfig.class).getConfig();
 
@@ -44,39 +46,75 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
             return;
         }
 
-        // Register a tick event handler to check for class changes
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player != null) {
-                checkForClassChange(client);
-            }
-        });
+        ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
     }
 
-    // Method that checks if the player's class has changed
+    private void onClientTick(MinecraftClient client) {
+        if (client.player != null) {
+            tickCounter++;
+            if (tickCounter >= CHECK_INTERVAL) {
+                checkForClassChange(client);
+                tickCounter = 0;
+            }
+        }
+    }
+
     private void checkForClassChange(MinecraftClient client) {
         String currentClass = getCurrentClass();
+        LOGGER.debug("Current class: " + currentClass + ", Last class: " + lastClass);
         if (!currentClass.equals(lastClass) && !currentClass.equals("NONE")) {
-            // Class has changed, update keybind profile
+            LOGGER.info("Class changed from " + lastClass + " to " + currentClass);
             updateKeybindProfile(client, currentClass);
-            lastClass = currentClass;  // Update the lastClass to prevent redundant updates
+            lastClass = currentClass;
         }
     }
 
     private void updateKeybindProfile(MinecraftClient client, String currentClass) {
         Map<String, String> savedProfile = config.getProfile(currentClass);
-        if (savedProfile != null) {
-            updateOptionsFile(savedProfile);
-            client.options.load();
+        LOGGER.info("Updating keybind profile for " + currentClass + ". Saved profile: " + savedProfile);
 
-            // Show a toast notification for keybind update
-            client.execute(() -> {
-                SystemToast.add(
-                        client.getToastManager(),
-                        SystemToast.Type.WORLD_BACKUP,  // Use a valid toast type
-                        Text.of("Keybind profile updated"),
-                        Text.of("Keybind profile updated for " + currentClass)
-                );
-            });
+        if (savedProfile != null && !savedProfile.isEmpty()) {
+            boolean changes = false;
+            for (KeyBinding keyBinding : client.options.allKeys) {
+                String savedKey = savedProfile.get(keyBinding.getTranslationKey());
+                if (savedKey != null) {
+                    InputUtil.Key key = InputUtil.fromTranslationKey(savedKey);
+                    if (key != null && !keyBinding.getBoundKeyTranslationKey().equals(savedKey)) {
+                        LOGGER.info("Updating keybinding: " + keyBinding.getTranslationKey() + " from " + keyBinding.getBoundKeyTranslationKey() + " to " + savedKey);
+                        keyBinding.setBoundKey(key);
+                        changes = true;
+                    }
+                }
+            }
+
+            if (changes) {
+                // Force a refresh of the keybinding system
+                KeyBinding.updateKeysByCode();
+
+                // Update the internal state of keybindings
+                for (KeyBinding keyBinding : client.options.allKeys) {
+                    keyBinding.setPressed(false);
+                }
+
+                // Save changes to options.txt
+                client.options.write();
+
+                // Show a toast notification for keybind update
+                client.execute(() -> {
+                    SystemToast.add(
+                            client.getToastManager(),
+                            SystemToast.Type.WORLD_BACKUP,
+                            Text.of("Keybind Profile Updated"),
+                            Text.of("Keybind profile updated for " + currentClass)
+                    );
+                });
+
+                LOGGER.info("Updated keybind profile for " + currentClass);
+            } else {
+                LOGGER.info("No changes needed for keybind profile of " + currentClass);
+            }
+        } else {
+            LOGGER.warn("No saved profile found for " + currentClass);
         }
     }
 
@@ -102,31 +140,24 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
         }
     }
 
-    private void updateOptionsFile(Map<String, String> profile) {
-        try {
-            Path optionsPath = Paths.get(MinecraftClient.getInstance().runDirectory.getPath(), "options.txt");
-            List<String> lines = Files.readAllLines(optionsPath);
-            List<String> updatedLines = new ArrayList<>();
-
-            for (String line : lines) {
-                String updatedLine = line;
-                for (Map.Entry<String, String> entry : profile.entrySet()) {
-                    if (line.startsWith(entry.getKey())) {
-                        updatedLine = entry.getKey() + ":" + entry.getValue();
-                        break;
-                    }
-                }
-                updatedLines.add(updatedLine);
-            }
-
-            Files.write(optionsPath, updatedLines);
-        } catch (IOException e) {
-            LOGGER.error("Failed to update options.txt", e);
-        }
-    }
-
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
         return ClassKeybindProfilesScreen::createConfigScreen;
+    }
+
+    public static void saveConfig() {
+        AutoConfig.getConfigHolder(ClassKeybindProfilesConfig.class).save();
+    }
+
+    public static void saveCurrentKeybindsForClass(String className) {
+        Map<String, String> currentKeybinds = Arrays.stream(MinecraftClient.getInstance().options.allKeys)
+                .filter(kb -> kb.getTranslationKey().startsWith("key.wynncraft-spell-caster"))
+                .collect(Collectors.toMap(
+                        KeyBinding::getTranslationKey,
+                        KeyBinding::getBoundKeyTranslationKey
+                ));
+        config.saveProfile(className, currentKeybinds);
+        saveConfig();
+        LOGGER.info("Saved current keybinds for class " + className + ": " + currentKeybinds);
     }
 }

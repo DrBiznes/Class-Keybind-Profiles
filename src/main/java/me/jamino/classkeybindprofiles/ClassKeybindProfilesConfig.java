@@ -1,6 +1,5 @@
 package me.jamino.classkeybindprofiles;
 
-import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
@@ -8,7 +7,7 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import java.util.HashMap;
 import java.util.Map;
 
-@Config(name = ClassKeybindProfiles.MOD_ID)
+@Config(name = "classkeybindprofiles")
 public class ClassKeybindProfilesConfig implements ConfigData {
 
     @ConfigEntry.Gui.Excluded
@@ -16,8 +15,6 @@ public class ClassKeybindProfilesConfig implements ConfigData {
 
     public void saveProfile(String className, Map<String, String> keybinds) {
         profiles.put(className, new HashMap<>(keybinds));
-        ClassKeybindProfiles.LOGGER.info("Saving profile for " + className + ": " + keybinds);
-        save();
     }
 
     public Map<String, String> getProfile(String className) {
@@ -26,10 +23,5 @@ public class ClassKeybindProfilesConfig implements ConfigData {
 
     public Map<String, Map<String, String>> getAllProfiles() {
         return new HashMap<>(profiles);
-    }
-
-    public void save() {
-        ClassKeybindProfiles.LOGGER.info("Saving config to disk");
-        AutoConfig.getConfigHolder(ClassKeybindProfilesConfig.class).save();
     }
 }
