@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "classkeybindprofiles",
+  "version": "${version}",
+  "name": "Class Keybind Profiles",
+  "description": "Automatically switches between presaved keybind profiles for Wynncraft classes",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/classkeybindprofiles/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "me.jamino.classkeybindprofiles.ClassKeybindProfiles"
+    ],
+    "modmenu": [
+      "me.jamino.classkeybindprofiles.ClassKeybindProfiles"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}",
+    "wynntils": "*",
+    "modmenu": "*",
+    "cloth-config": "*"
+  }
+}
