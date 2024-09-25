@@ -11,8 +11,20 @@ import net.minecraft.client.toast.SystemToast;
 import com.wynntils.models.character.type.ClassType;
 
 import java.util.Map;
+import java.util.HashMap;
 
 public class ClassKeybindProfilesScreen {
+
+    private static final Map<String, String> FRIENDLY_NAMES = new HashMap<>();
+
+    static {
+        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.first", "First Spell");
+        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.second", "Second Spell");
+        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.third", "Third Spell");
+        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.fourth", "Fourth Spell");
+        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.melee", "Melee Attack");
+        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.config", "Open Spell Caster Config");
+    }
 
     public static Screen createConfigScreen(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
@@ -32,7 +44,9 @@ public class ClassKeybindProfilesScreen {
             Map<String, String> currentProfile = ClassKeybindProfiles.config.getProfile(classType.getName());
             if (currentProfile != null) {
                 for (Map.Entry<String, String> entry : currentProfile.entrySet()) {
-                    category.addEntry(entryBuilder.startTextDescription(Text.of(entry.getKey() + ": " + entry.getValue()))
+                    String friendlyName = getFriendlyName(entry.getKey());
+                    String friendlyKey = getFriendlyKeyName(entry.getValue());
+                    category.addEntry(entryBuilder.startTextDescription(Text.of(friendlyName + ": " + friendlyKey))
                             .build());
                 }
             }
@@ -61,5 +75,27 @@ public class ClassKeybindProfilesScreen {
         builder.setSavingRunnable(ClassKeybindProfiles::saveConfig);
 
         return builder.build();
+    }
+
+    private static String getFriendlyName(String key) {
+        return FRIENDLY_NAMES.getOrDefault(key, key);
+    }
+
+    private static String getFriendlyKeyName(String keyValue) {
+        if (keyValue.startsWith("key.keyboard.")) {
+            return capitalize(keyValue.substring("key.keyboard.".length()));
+        } else if (keyValue.startsWith("key.mouse.")) {
+            return "Mouse Button " + keyValue.substring("key.mouse.".length());
+        } else if (keyValue.equals("key.keyboard.unknown")) {
+            return "Unbound";
+        }
+        return keyValue;
+    }
+
+    private static String capitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }
