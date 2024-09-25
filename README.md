@@ -3,7 +3,7 @@
 ![CKPbanner](https://github.com/user-attachments/assets/f02ea832-1d79-4a10-8785-fd3b48dd1229)
 
 
-No more fumbling for the right spell key when you switch from your Warrior to your Mage! Class Keybind Profiles let's you save unique keybind setups for each class and automatically switches between them for you. Made for my modpack World of Wynncraft
+No more fumbling for the right spell key when you switch from your Warrior to your Mage! Class Keybind Profiles let's you save unique keybind setups for each class and automatically switches between them for you. Made for my modpack [World of Wynncraft.](https://github.com/bob10234/World-of-Wynncraft)
 
 ## What's Up?
 
