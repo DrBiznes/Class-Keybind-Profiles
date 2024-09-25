@@ -24,9 +24,10 @@ No more fumbling for the right spell key when you switch from your Warrior to yo
 
 You can configure Class Keybind Profiles using Mod Menu. Just set your keybinds in the normal controls settings then go to the Mod Menu page for CKP and change "Save current keybinds" to YES for all classes you want to apply your current keybind setup to, then hit Save & Exit to actually save the profiles. Make sure to disable Wynntils spell macros feature.
 
-## Usage
+## Future Features
 
-Once installed, the mod "just works" automatically when you join Wynncraft. Switch classes, and watch in awe. You'll see a toast notification when your keybinds update, because who doesn't love toast?
+- Specific profiles for each character
+- Suggest features on the Github Issues page!
 
 ## Requirements
 
