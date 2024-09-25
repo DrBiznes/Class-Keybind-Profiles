@@ -106,15 +106,17 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
                 // Save changes to options.txt
                 client.options.write();
 
-                // Show a toast notification for keybind update
-                client.execute(() -> {
-                    SystemToast.add(
-                            client.getToastManager(),
-                            SystemToast.Type.WORLD_BACKUP,
-                            Text.of("Keybind Profile Updated"),
-                            Text.of("Keybind profile updated for " + currentClass)
-                    );
-                });
+                // Show a toast notification for keybind update if not disabled
+                if (!config.isToastNotificationsDisabled()) {
+                    client.execute(() -> {
+                        SystemToast.add(
+                                client.getToastManager(),
+                                SystemToast.Type.WORLD_BACKUP,
+                                Text.of("Keybind Profile Updated"),
+                                Text.of("Keybind profile updated for " + currentClass)
+                        );
+                    });
+                }
 
                 LOGGER.info("Updated keybind profile for " + currentClass);
             }
@@ -163,5 +165,35 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
         config.saveProfile(classType.getName(), currentKeybinds);
         saveConfig();
         LOGGER.info("Saved current keybinds for class " + className + ": " + currentKeybinds);
+
+        // Show a toast notification if not disabled
+        if (!config.isToastNotificationsDisabled()) {
+            MinecraftClient.getInstance().execute(() -> {
+                SystemToast.add(
+                        MinecraftClient.getInstance().getToastManager(),
+                        SystemToast.Type.WORLD_BACKUP,
+                        Text.of("Profile Saved"),
+                        Text.of("Keybind profile saved for " + className)
+                );
+            });
+        }
+    }
+
+    public static void clearProfileForClass(String className) {
+        config.clearProfile(className);
+        saveConfig();
+        LOGGER.info("Cleared keybind profile for class " + className);
+
+        // Show a toast notification if not disabled
+        if (!config.isToastNotificationsDisabled()) {
+            MinecraftClient.getInstance().execute(() -> {
+                SystemToast.add(
+                        MinecraftClient.getInstance().getToastManager(),
+                        SystemToast.Type.WORLD_BACKUP,
+                        Text.of("Profile Cleared"),
+                        Text.of("Keybind profile cleared for " + className)
+                );
+            });
+        }
     }
 }

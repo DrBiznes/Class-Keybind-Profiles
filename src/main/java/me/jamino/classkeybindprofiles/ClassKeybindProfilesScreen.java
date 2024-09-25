@@ -33,6 +33,30 @@ public class ClassKeybindProfilesScreen {
 
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
+        // Add the "Config" category
+        ConfigCategory configCategory = builder.getOrCreateCategory(Text.of("Config"));
+
+        // Add option to disable toast notifications
+        configCategory.addEntry(entryBuilder.startBooleanToggle(Text.of("Disable Toast Notifications"), ClassKeybindProfiles.config.isToastNotificationsDisabled())
+                .setDefaultValue(false)
+                .setSaveConsumer(ClassKeybindProfiles.config::setDisableToastNotifications)
+                .build());
+
+        // Add clear profile buttons for each class type
+        for (ClassType classType : ClassType.values()) {
+            if (classType == ClassType.NONE) continue; // Skip the NONE class type
+
+            configCategory.addEntry(entryBuilder.startBooleanToggle(Text.of("Clear " + classType.getFullName() + " Profile"), false)
+                    .setSaveConsumer(value -> {
+                        if (value) {
+                            ClassKeybindProfiles.clearProfileForClass(classType.getName());
+                        }
+                    })
+                    .setDefaultValue(false)
+                    .build());
+        }
+
+        // Add categories for each class type
         for (ClassType classType : ClassType.values()) {
             if (classType == ClassType.NONE) continue; // Skip the NONE class type
 
@@ -55,17 +79,6 @@ public class ClassKeybindProfilesScreen {
                     .setSaveConsumer(value -> {
                         if (value) {
                             ClassKeybindProfiles.saveCurrentKeybindsForClass(classType.getName());
-                            ClassKeybindProfiles.LOGGER.info("Saved keybind profile for " + classType.getFullName());
-
-                            // Show a toast notification
-                            MinecraftClient.getInstance().execute(() -> {
-                                SystemToast.add(
-                                        MinecraftClient.getInstance().getToastManager(),
-                                        SystemToast.Type.WORLD_BACKUP,
-                                        Text.of("Profile Saved"),
-                                        Text.of("Keybind profile saved for " + classType.getFullName())
-                                );
-                            });
                         }
                     })
                     .setDefaultValue(false)

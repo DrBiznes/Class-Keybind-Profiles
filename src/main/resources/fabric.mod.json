@@ -3,9 +3,15 @@
   "id": "classkeybindprofiles",
   "version": "${version}",
   "name": "Class Keybind Profiles",
-  "description": "Automatically switches between presaved keybind profiles for Wynncraft classes",
-  "authors": [],
-  "contact": {},
+  "description": "Automatically switches between presaved keybind profiles for Wynncraft classes.",
+  "authors": [
+    "DrBiznes"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/class-keybind-profiles",
+    "sources": "https://github.com/DrBiznes/Class-Keybind-Profiles",
+    "issues": "https://github.com/DrBiznes/Class-Keybind-Profiles/issues"
+  },
   "license": "MIT",
   "icon": "assets/classkeybindprofiles/icon.png",
   "environment": "client",
