@@ -23,13 +23,14 @@ import java.util.stream.Collectors;
 // Wynntils imports
 import com.wynntils.core.components.Models;
 import com.wynntils.models.character.CharacterModel;
+import com.wynntils.models.character.type.ClassType;
 
 @Environment(EnvType.CLIENT)
 public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
     public static final String MOD_ID = "classkeybindprofiles";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     public static ClassKeybindProfilesConfig config;
-    public static final String[] CLASS_TYPES = {"ARCHER", "ASSASSIN", "MAGE", "SHAMAN", "WARRIOR"};
+    public static final ClassType[] CLASS_TYPES = ClassType.values();
     private static boolean wynntilsLoaded = false;
     private String lastClass = "NONE";
     private int tickCounter = 0;
@@ -70,7 +71,8 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
     }
 
     private void updateKeybindProfile(MinecraftClient client, String currentClass) {
-        Map<String, String> savedProfile = config.getProfile(currentClass);
+        ClassType classType = ClassType.fromName(currentClass);
+        Map<String, String> savedProfile = config.getProfile(classType.getName());
         LOGGER.info("Updating keybind profile for " + currentClass + ". Saved profile: " + savedProfile);
 
         if (savedProfile != null && !savedProfile.isEmpty()) {
@@ -127,9 +129,11 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
         try {
             CharacterModel character = Models.Character;
             if (character.hasCharacter()) {
-                String className = character.getActualName();
+                ClassType classType = character.getClassType();
+                boolean isReskinned = ClassType.isReskinned(character.getActualName());
+                String className = classType.getActualName(isReskinned);
                 LOGGER.info("The player is currently playing: " + className);
-                return className.toUpperCase();
+                return className;
             } else {
                 LOGGER.info("The player has no active character.");
                 return "NONE";
@@ -150,13 +154,14 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
     }
 
     public static void saveCurrentKeybindsForClass(String className) {
+        ClassType classType = ClassType.fromName(className);
         Map<String, String> currentKeybinds = Arrays.stream(MinecraftClient.getInstance().options.allKeys)
                 .filter(kb -> kb.getTranslationKey().startsWith("key.wynncraft-spell-caster"))
                 .collect(Collectors.toMap(
                         KeyBinding::getTranslationKey,
                         KeyBinding::getBoundKeyTranslationKey
                 ));
-        config.saveProfile(className, currentKeybinds);
+        config.saveProfile(classType.getName(), currentKeybinds);
         saveConfig();
         LOGGER.info("Saved current keybinds for class " + className + ": " + currentKeybinds);
     }
