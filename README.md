@@ -9,7 +9,6 @@ No more fumbling for the right spell key when you switch from your Warrior to yo
 
 - Automatically detects your current Wynncraft class
 - Switches to the corresponding keybind profile you created
-- Saves your custom keybind profiles for each class
 - Requires Wynntils and Wynncraft Spell Caster
 
 ## Installation
