@@ -8,10 +8,9 @@ No more fumbling for the right spell key when you switch from your Warrior to yo
 ## What's Up?
 
 - Automatically detects your current Wynncraft class
-- Switches to the corresponding keybind profile faster than you can say "For Fruma!"
+- Switches to the corresponding keybind profile you created
 - Saves your custom keybind profiles for each class
-- Configurable settings via Mod Menu (because who doesn't love options?)
-- Works seamlessly with Wynntils and Wynncraft Spell Caster
+- Requires Wynntils and Wynncraft Spell Caster
 
 ## Installation
 
