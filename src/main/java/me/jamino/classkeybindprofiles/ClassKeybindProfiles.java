@@ -35,6 +35,7 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
     private String lastClass = "NONE";
     private int tickCounter = 0;
     private static final int CHECK_INTERVAL = 20;
+    private boolean keybindsUpdated = false;
 
     @Override
     public void onInitializeClient() {
@@ -62,11 +63,15 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
 
     private void checkForClassChange(MinecraftClient client) {
         String currentClass = getCurrentClass();
-        LOGGER.debug("Current class: " + currentClass + ", Last class: " + lastClass);
         if (!currentClass.equals(lastClass) && !currentClass.equals("NONE")) {
             LOGGER.info("Class changed from " + lastClass + " to " + currentClass);
-            updateKeybindProfile(client, currentClass);
             lastClass = currentClass;
+            keybindsUpdated = false;  // Reset the flag when class changes
+        }
+
+        if (!keybindsUpdated && !currentClass.equals("NONE")) {
+            updateKeybindProfile(client, currentClass);
+            keybindsUpdated = true;  // Set the flag after updating keybinds
         }
     }
 
@@ -112,8 +117,6 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
                 });
 
                 LOGGER.info("Updated keybind profile for " + currentClass);
-            } else {
-                LOGGER.info("No changes needed for keybind profile of " + currentClass);
             }
         } else {
             LOGGER.warn("No saved profile found for " + currentClass);
@@ -122,7 +125,6 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
 
     private String getCurrentClass() {
         if (!wynntilsLoaded) {
-            LOGGER.warn("Wynntils not loaded. Cannot detect current class.");
             return "NONE";
         }
 
@@ -131,11 +133,8 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
             if (character.hasCharacter()) {
                 ClassType classType = character.getClassType();
                 boolean isReskinned = ClassType.isReskinned(character.getActualName());
-                String className = classType.getActualName(isReskinned);
-                LOGGER.info("The player is currently playing: " + className);
-                return className;
+                return classType.getActualName(isReskinned);
             } else {
-                LOGGER.info("The player has no active character.");
                 return "NONE";
             }
         } catch (Exception e) {
