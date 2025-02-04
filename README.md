@@ -22,7 +22,17 @@ No more fumbling for the right spell key when you switch from your Warrior to yo
 
 ## Configuration
 
-You can configure Class Keybind Profiles using Mod Menu. Just set your keybinds in the normal controls settings then go to the Mod Menu page for CKP and change "Save current keybinds" to YES for all classes you want to apply your current keybind setup to, then hit Save & Exit to actually save the profiles. Make sure to disable Wynntils spell macros feature.
+### Commands
+
+Class Keybind Profiles includes several commands to manage your keybind profiles:
+
+- `/ckp help` - Shows all available commands
+- `/ckp profiles` - Lists all classes and shows whether they have a saved profile
+- `/ckp save <className>` - Saves your current keybinds as a profile for the specified class
+- `/ckp delete <className>` - Deletes the saved profile for the specified class
+- `/ckp nuke` - Deletes all saved profiles
+
+You can also configure Class Keybind Profiles using Mod Menu. Just set your keybinds in the normal controls settings then go to the Mod Menu page for CKP and change "Save current keybinds" to YES for all classes you want to apply your current keybind setup to, then hit Save & Exit to actually save the profiles. Make sure to disable Wynntils spell macros feature.
 
 ## Future Features
 
