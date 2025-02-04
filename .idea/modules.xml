@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Class-Keybind-Profiles.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Class-Keybind-Profiles.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Class-Keybind-Profiles.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Class-Keybind-Profiles.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Class_Keybind_Profiles.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Class_Keybind_Profiles.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Class_Keybind_Profiles.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Class_Keybind_Profiles.test.iml" />
     </modules>

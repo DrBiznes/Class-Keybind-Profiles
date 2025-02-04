@@ -41,6 +41,7 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
     public void onInitializeClient() {
         AutoConfig.register(ClassKeybindProfilesConfig.class, GsonConfigSerializer::new);
         config = AutoConfig.getConfigHolder(ClassKeybindProfilesConfig.class).getConfig();
+        ClassKeybindProfilesCommands.register();
 
         wynntilsLoaded = FabricLoader.getInstance().isModLoaded("wynntils");
         if (!wynntilsLoaded) {

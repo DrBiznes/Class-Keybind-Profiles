@@ -32,7 +32,7 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modImplementation files("libs/wynntils-2.1.1-fabric+MC-1.21.jar")
+    modImplementation files("libs/wynntils-3.0.3-fabric+MC-1.21.4.jar")
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
