@@ -9,16 +9,14 @@ No more fumbling for the right spell key when you switch from your Warrior to yo
 
 - Automatically detects your current Wynncraft class
 - Switches to the corresponding keybind profile you created
-- Requires Wynntils and Wynncraft Spell Caster
+- Works with Wynntils, Wynncraft Spell Caster, and BetterWynnMacros
 
 ## Installation
 
 1. Make sure you have Fabric Loader and Fabric API installed
-2. Download and install Wynntils
-3. Grab the Wynncraft Spell Caster mod (it's the spell to our bind)
-4. Disable Wynntils spell macros in Wynntils settings if you have it enabled.
-5. Download the latest version of Class Keybind Profiles from the versions page
-6. Place the downloaded .jar file in your Minecraft mods folder
+2. Download and install Wynntils or Wynncraft Spell Caster or BWM
+3. Download the latest version of Class Keybind Profiles from the versions page
+4. Place the downloaded .jar file in your Minecraft mods folder
 
 ## Configuration
 
@@ -28,6 +26,7 @@ Class Keybind Profiles includes several commands to manage your keybind profiles
 
 - `/ckp help` - Shows all available commands
 - `/ckp profiles` - Lists all classes and shows whether they have a saved profile
+- `/ckp save` - Saves your current keybinds as a profile for your selected class
 - `/ckp save <className>` - Saves your current keybinds as a profile for the specified class
 - `/ckp delete <className>` - Deletes the saved profile for the specified class
 - `/ckp nuke` - Deletes all saved profiles
@@ -41,11 +40,10 @@ You can also configure Class Keybind Profiles using Mod Menu. Just set your keyb
 
 ## Requirements
 
-- Minecraft 1.21
+- Minecraft 1.21.4
 - Fabric Loader 0.16.5 or higher
 - Fabric API
-- Wynntils 2.1.1 or higher
-- Wynncraft Spell Caster
+- Wynntils 3.0.3 or higher
 - Mod Menu
 - Cloth Config API
 

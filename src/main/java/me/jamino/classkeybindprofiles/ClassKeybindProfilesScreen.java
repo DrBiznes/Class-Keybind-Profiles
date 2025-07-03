@@ -12,18 +12,34 @@ import com.wynntils.models.character.type.ClassType;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class ClassKeybindProfilesScreen {
 
-    private static final Map<String, String> FRIENDLY_NAMES = new HashMap<>();
+    private static final Map<String, String> WYNNTILS_NAMES = new HashMap<>();
+    private static final Map<String, String> WYNNCRAFT_SPELL_CASTER_NAMES = new HashMap<>();
+    private static final Map<String, String> BETTER_WYNN_MACROS_NAMES = new HashMap<>();
 
     static {
-        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.first", "First Spell");
-        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.second", "Second Spell");
-        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.third", "Third Spell");
-        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.fourth", "Fourth Spell");
-        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.spell.melee", "Melee Attack");
-        FRIENDLY_NAMES.put("key.wynncraft-spell-caster.config", "Open Spell Caster Config");
+        // Wynntils friendly names (updated with correct keys)
+        WYNNTILS_NAMES.put("Cast 1st Spell", "Cast 1st Spell");
+        WYNNTILS_NAMES.put("Cast 2nd Spell", "Cast 2nd Spell");
+        WYNNTILS_NAMES.put("Cast 3rd Spell", "Cast 3rd Spell");
+        WYNNTILS_NAMES.put("Cast 4th Spell", "Cast 4th Spell");
+
+        // Wynncraft Spell Caster friendly names
+        WYNNCRAFT_SPELL_CASTER_NAMES.put("key.wynncraft-spell-caster.spell.first", "First Spell");
+        WYNNCRAFT_SPELL_CASTER_NAMES.put("key.wynncraft-spell-caster.spell.second", "Second Spell");
+        WYNNCRAFT_SPELL_CASTER_NAMES.put("key.wynncraft-spell-caster.spell.third", "Third Spell");
+        WYNNCRAFT_SPELL_CASTER_NAMES.put("key.wynncraft-spell-caster.spell.fourth", "Fourth Spell");
+        WYNNCRAFT_SPELL_CASTER_NAMES.put("key.wynncraft-spell-caster.spell.melee", "Melee Attack");
+        WYNNCRAFT_SPELL_CASTER_NAMES.put("key.wynncraft-spell-caster.config", "Open Spell Caster Config");
+
+        // BetterWynnMacros friendly names (updated with correct keys)
+        BETTER_WYNN_MACROS_NAMES.put("key.ktnwynnmacros.spell.1", "Spell 1");
+        BETTER_WYNN_MACROS_NAMES.put("key.ktnwynnmacros.spell.2", "Spell 2");
+        BETTER_WYNN_MACROS_NAMES.put("key.ktnwynnmacros.spell.3", "Spell 3");
+        BETTER_WYNN_MACROS_NAMES.put("key.ktnwynnmacros.spell.4", "Spell 4");
     }
 
     public static Screen createConfigScreen(Screen parent) {
@@ -62,17 +78,59 @@ public class ClassKeybindProfilesScreen {
 
             ConfigCategory category = builder.getOrCreateCategory(Text.of(classType.getFullName()));
 
-            category.addEntry(entryBuilder.startTextDescription(Text.of("Current keybinds:"))
-                    .build());
-
             Map<String, String> currentProfile = ClassKeybindProfiles.config.getProfile(classType.getName());
-            if (currentProfile != null) {
-                for (Map.Entry<String, String> entry : currentProfile.entrySet()) {
-                    String friendlyName = getFriendlyName(entry.getKey());
-                    String friendlyKey = getFriendlyKeyName(entry.getValue());
-                    category.addEntry(entryBuilder.startTextDescription(Text.of(friendlyName + ": " + friendlyKey))
+            if (currentProfile != null && !currentProfile.isEmpty()) {
+                // Group keybinds by mod type
+                Map<String, String> wynntilsKeybinds = currentProfile.entrySet().stream()
+                        .filter(entry -> entry.getKey().startsWith("Cast "))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                Map<String, String> wynncraftKeybinds = currentProfile.entrySet().stream()
+                        .filter(entry -> entry.getKey().startsWith("key.wynncraft-spell-caster"))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                Map<String, String> betterWynnKeybinds = currentProfile.entrySet().stream()
+                        .filter(entry -> entry.getKey().startsWith("key.ktnwynnmacros"))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                // Show Wynntils first (if any)
+                if (!wynntilsKeybinds.isEmpty()) {
+                    category.addEntry(entryBuilder.startTextDescription(Text.of("Wynntils:"))
                             .build());
+                    for (Map.Entry<String, String> entry : wynntilsKeybinds.entrySet()) {
+                        String friendlyName = WYNNTILS_NAMES.getOrDefault(entry.getKey(), entry.getKey());
+                        String friendlyKey = getFriendlyKeyName(entry.getValue());
+                        category.addEntry(entryBuilder.startTextDescription(Text.of("  " + friendlyName + ": " + friendlyKey))
+                                .build());
+                    }
                 }
+
+                // Show Wynncraft Spell Caster (if any)
+                if (!wynncraftKeybinds.isEmpty()) {
+                    category.addEntry(entryBuilder.startTextDescription(Text.of("Wynncraft Spell Caster:"))
+                            .build());
+                    for (Map.Entry<String, String> entry : wynncraftKeybinds.entrySet()) {
+                        String friendlyName = WYNNCRAFT_SPELL_CASTER_NAMES.getOrDefault(entry.getKey(), entry.getKey());
+                        String friendlyKey = getFriendlyKeyName(entry.getValue());
+                        category.addEntry(entryBuilder.startTextDescription(Text.of("  " + friendlyName + ": " + friendlyKey))
+                                .build());
+                    }
+                }
+
+                // Show BetterWynnMacros (if any)
+                if (!betterWynnKeybinds.isEmpty()) {
+                    category.addEntry(entryBuilder.startTextDescription(Text.of("BetterWynnMacros:"))
+                            .build());
+                    for (Map.Entry<String, String> entry : betterWynnKeybinds.entrySet()) {
+                        String friendlyName = BETTER_WYNN_MACROS_NAMES.getOrDefault(entry.getKey(), entry.getKey());
+                        String friendlyKey = getFriendlyKeyName(entry.getValue());
+                        category.addEntry(entryBuilder.startTextDescription(Text.of("  " + friendlyName + ": " + friendlyKey))
+                                .build());
+                    }
+                }
+            } else {
+                category.addEntry(entryBuilder.startTextDescription(Text.of("No saved keybinds"))
+                        .build());
             }
 
             category.addEntry(entryBuilder.startBooleanToggle(Text.of("Save Current Keybinds"), false)
@@ -88,10 +146,6 @@ public class ClassKeybindProfilesScreen {
         builder.setSavingRunnable(ClassKeybindProfiles::saveConfig);
 
         return builder.build();
-    }
-
-    private static String getFriendlyName(String key) {
-        return FRIENDLY_NAMES.getOrDefault(key, key);
     }
 
     private static String getFriendlyKeyName(String keyValue) {

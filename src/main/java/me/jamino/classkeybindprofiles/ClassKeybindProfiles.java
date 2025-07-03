@@ -126,7 +126,7 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
         }
     }
 
-    private String getCurrentClass() {
+    public static String getCurrentClass() {
         if (!wynntilsLoaded) {
             return "NONE";
         }
@@ -157,12 +157,8 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
 
     public static void saveCurrentKeybindsForClass(String className) {
         ClassType classType = ClassType.fromName(className);
-        Map<String, String> currentKeybinds = Arrays.stream(MinecraftClient.getInstance().options.allKeys)
-                .filter(kb -> kb.getTranslationKey().startsWith("key.wynncraft-spell-caster"))
-                .collect(Collectors.toMap(
-                        KeyBinding::getTranslationKey,
-                        KeyBinding::getBoundKeyTranslationKey
-                ));
+        Map<String, String> currentKeybinds = getAllSupportedKeybinds();
+
         config.saveProfile(classType.getName(), currentKeybinds);
         saveConfig();
         LOGGER.info("Saved current keybinds for class " + className + ": " + currentKeybinds);
@@ -178,6 +174,20 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
                 );
             });
         }
+    }
+
+    private static Map<String, String> getAllSupportedKeybinds() {
+        return Arrays.stream(MinecraftClient.getInstance().options.allKeys)
+                .filter(kb -> {
+                    String key = kb.getTranslationKey();
+                    return key.startsWith("key.wynncraft-spell-caster") ||
+                            key.startsWith("Cast ") ||  // Wynntils: "Cast 1st Spell", etc.
+                            key.startsWith("key.ktnwynnmacros");  // Fixed: BetterWynnMacros uses "key.ktnwynnmacros", not "key_key.ktnwynnmacros"
+                })
+                .collect(Collectors.toMap(
+                        KeyBinding::getTranslationKey,
+                        KeyBinding::getBoundKeyTranslationKey
+                ));
     }
 
     public static void clearProfileForClass(String className) {
