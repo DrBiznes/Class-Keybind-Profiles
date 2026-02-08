@@ -84,11 +84,11 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
         if (savedProfile != null && !savedProfile.isEmpty()) {
             boolean changes = false;
             for (KeyBinding keyBinding : client.options.allKeys) {
-                String savedKey = savedProfile.get(keyBinding.getTranslationKey());
+                String savedKey = savedProfile.get(keyBinding.getId());
                 if (savedKey != null) {
                     InputUtil.Key key = InputUtil.fromTranslationKey(savedKey);
                     if (key != null && !keyBinding.getBoundKeyTranslationKey().equals(savedKey)) {
-                        LOGGER.info("Updating keybinding: " + keyBinding.getTranslationKey() + " from " + keyBinding.getBoundKeyTranslationKey() + " to " + savedKey);
+                        LOGGER.info("Updating keybinding: " + keyBinding.getId() + " from " + keyBinding.getBoundKeyTranslationKey() + " to " + savedKey);
                         keyBinding.setBoundKey(key);
                         changes = true;
                     }
@@ -179,13 +179,13 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
     private static Map<String, String> getAllSupportedKeybinds() {
         return Arrays.stream(MinecraftClient.getInstance().options.allKeys)
                 .filter(kb -> {
-                    String key = kb.getTranslationKey();
+                    String key = kb.getId();
                     return key.startsWith("key.wynncraft-spell-caster") ||
                             key.startsWith("Cast ") ||  // Wynntils: "Cast 1st Spell", etc.
                             key.startsWith("key.ktnwynnmacros");  // Fixed: BetterWynnMacros uses "key.ktnwynnmacros", not "key_key.ktnwynnmacros"
                 })
                 .collect(Collectors.toMap(
-                        KeyBinding::getTranslationKey,
+                        KeyBinding::getId,
                         KeyBinding::getBoundKeyTranslationKey
                 ));
     }
