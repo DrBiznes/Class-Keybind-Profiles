@@ -2,10 +2,12 @@ package me.jamino.classkeybindprofiles;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.wynntils.models.character.type.ClassType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -30,6 +32,12 @@ public class ClassKeybindProfilesCommands {
                     .then(literal("delete")
                             .then(ClientCommandManager.argument("className", ClassArgumentType.classType())
                                     .executes(context -> executeDelete(context, ClassArgumentType.getClassType(context, "className")))))
+                    .then(literal("export")
+                            .then(ClientCommandManager.argument("className", ClassArgumentType.classType())
+                                    .executes(context -> executeExport(context, ClassArgumentType.getClassType(context, "className")))))
+                    .then(literal("import")
+                            .then(ClientCommandManager.argument("code", StringArgumentType.greedyString())
+                                    .executes(context -> executeImport(context, StringArgumentType.getString(context, "code")))))
                     .then(literal("nuke").executes(ClassKeybindProfilesCommands::executeNuke)));
         });
     }
@@ -41,6 +49,8 @@ public class ClassKeybindProfilesCommands {
         context.getSource().sendFeedback(Text.literal("/ckp profiles - Lists all saved profiles").formatted(Formatting.YELLOW));
         context.getSource().sendFeedback(Text.literal("/ckp save - Saves current keybinds for your current class").formatted(Formatting.YELLOW));
         context.getSource().sendFeedback(Text.literal("/ckp save <className> - Saves current keybinds for the specified class").formatted(Formatting.YELLOW));
+        context.getSource().sendFeedback(Text.literal("/ckp export <className> - Exports profile as shareable code (copies to clipboard)").formatted(Formatting.YELLOW));
+        context.getSource().sendFeedback(Text.literal("/ckp import <code> - Imports profile from code").formatted(Formatting.YELLOW));
         context.getSource().sendFeedback(Text.literal("/ckp delete <className> - Deletes the profile for the specified class").formatted(Formatting.YELLOW));
         context.getSource().sendFeedback(Text.literal("/ckp nuke - Deletes all saved profiles").formatted(Formatting.YELLOW));
         context.getSource().sendFeedback(Text.literal("Available classes: " + ALL_CLASSES).formatted(Formatting.GRAY));
@@ -189,6 +199,57 @@ public class ClassKeybindProfilesCommands {
             }
         }
         context.getSource().sendFeedback(Text.literal("Successfully deleted all keybind profiles").formatted(Formatting.GREEN));
+        return 1;
+    }
+
+    private static int executeExport(CommandContext<FabricClientCommandSource> context, ClassType classType) {
+        if (classType == ClassType.NONE) {
+            context.getSource().sendFeedback(Text.literal("Invalid class name.").formatted(Formatting.RED));
+            return 0;
+        }
+
+        String properClassName = classType.getName().substring(0, 1).toUpperCase()
+                + classType.getName().substring(1).toLowerCase();
+
+        String code = ClassKeybindProfiles.exportProfile(classType.getName());
+        if (code == null) {
+            context.getSource().sendFeedback(Text.literal("No profile found for " + properClassName)
+                    .formatted(Formatting.RED));
+            return 0;
+        }
+
+        // Copy to clipboard
+        MinecraftClient.getInstance().keyboard.setClipboard(code);
+
+        context.getSource().sendFeedback(Text.literal("=== Profile Export ===").formatted(Formatting.GOLD));
+        context.getSource().sendFeedback(Text.literal("Successfully exported profile for " + properClassName)
+                .formatted(Formatting.GREEN));
+        context.getSource().sendFeedback(Text.literal("Code copied to clipboard!").formatted(Formatting.YELLOW));
+        context.getSource().sendFeedback(Text.literal("Share this code with others or use /ckp import <code> to restore it")
+                .formatted(Formatting.GRAY));
+
+        return 1;
+    }
+
+    private static int executeImport(CommandContext<FabricClientCommandSource> context, String code) {
+        String className = ClassKeybindProfiles.importProfile(code);
+        if (className == null) {
+            context.getSource().sendFeedback(Text.literal("Failed to import profile. Invalid code format.")
+                    .formatted(Formatting.RED));
+            context.getSource().sendFeedback(Text.literal("Make sure the code starts with 'CKP_' and is not corrupted")
+                    .formatted(Formatting.GRAY));
+            return 0;
+        }
+
+        String properClassName = className.substring(0, 1).toUpperCase()
+                + className.substring(1).toLowerCase();
+
+        context.getSource().sendFeedback(Text.literal("=== Profile Import ===").formatted(Formatting.GOLD));
+        context.getSource().sendFeedback(Text.literal("Successfully imported profile for " + properClassName)
+                .formatted(Formatting.GREEN));
+        context.getSource().sendFeedback(Text.literal("The profile will be applied when you switch to " + properClassName)
+                .formatted(Formatting.GRAY));
+
         return 1;
     }
 }

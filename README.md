@@ -28,10 +28,14 @@ Class Keybind Profiles includes several commands to manage your keybind profiles
 - `/ckp profiles` - Lists all classes and shows whether they have a saved profile
 - `/ckp save` - Saves your current keybinds as a profile for your selected class
 - `/ckp save <className>` - Saves your current keybinds as a profile for the specified class
+- `/ckp export <className>` - Exports a profile as a shareable code (copies to clipboard)
+- `/ckp import <code>` - Imports a profile from a shareable code
 - `/ckp delete <className>` - Deletes the saved profile for the specified class
 - `/ckp nuke` - Deletes all saved profiles
 
 You can also configure Class Keybind Profiles using Mod Menu. Just set your keybinds in the normal controls settings then go to the Mod Menu page for CKP and change "Save current keybinds" to YES for all classes you want to apply your current keybind setup to, then hit Save & Exit to actually save the profiles. Make sure to disable Wynntils spell macros feature.
+
+CKP will automatically save your keybinds when you switch classes, so you never lose your setup! You can disable this in the config if you prefer manual saving.
 
 ## Future Features
 
@@ -40,10 +44,10 @@ You can also configure Class Keybind Profiles using Mod Menu. Just set your keyb
 
 ## Requirements
 
-- Minecraft 1.21.4
-- Fabric Loader 0.16.5 or higher
+- Minecraft 1.21.11
+- Fabric Loader 0.18.1 or higher
 - Fabric API
-- Wynntils 3.0.3 or higher
+- Wynntils 4.0.0-beta.4 or higher
 - Mod Menu
 - Cloth Config API
 

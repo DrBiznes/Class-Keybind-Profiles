@@ -19,6 +19,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Base64;
+import java.nio.charset.StandardCharsets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 
 // Wynntils imports
 import com.wynntils.core.components.Models;
@@ -66,6 +71,22 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
         String currentClass = getCurrentClass();
         if (!currentClass.equals(lastClass) && !currentClass.equals("NONE")) {
             LOGGER.info("Class changed from " + lastClass + " to " + currentClass);
+
+            // Auto-save keybinds for the previous class if enabled
+            if (config.isAutoSaveOnClassChange() && !lastClass.equals("NONE")) {
+                saveCurrentKeybindsForClass(lastClass);
+                LOGGER.info("Auto-saved keybinds for " + lastClass);
+
+                // Show toast notification if not disabled
+                if (!config.isSaveToastNotificationsDisabled()) {
+                    client.getToastManager().add(
+                            SystemToast.create(client,
+                                    SystemToast.Type.WORLD_BACKUP,
+                                    Text.literal("Class Keybind Profiles"),
+                                    Text.literal("Auto-saved keybinds for " + lastClass)));
+                }
+            }
+
             lastClass = currentClass;
             keybindsUpdated = false;  // Reset the flag when class changes
         }
@@ -108,7 +129,7 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
                 client.options.write();
 
                 // Show a toast notification for keybind update if not disabled
-                if (!config.isToastNotificationsDisabled()) {
+                if (!config.isUpdateToastNotificationsDisabled()) {
                     client.execute(() -> {
                         SystemToast.add(
                                 client.getToastManager(),
@@ -164,7 +185,7 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
         LOGGER.info("Saved current keybinds for class " + className + ": " + currentKeybinds);
 
         // Show a toast notification if not disabled
-        if (!config.isToastNotificationsDisabled()) {
+        if (!config.isSaveToastNotificationsDisabled()) {
             MinecraftClient.getInstance().execute(() -> {
                 SystemToast.add(
                         MinecraftClient.getInstance().getToastManager(),
@@ -196,7 +217,7 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
         LOGGER.info("Cleared keybind profile for class " + className);
 
         // Show a toast notification if not disabled
-        if (!config.isToastNotificationsDisabled()) {
+        if (!config.isSaveToastNotificationsDisabled()) {
             MinecraftClient.getInstance().execute(() -> {
                 SystemToast.add(
                         MinecraftClient.getInstance().getToastManager(),
@@ -205,6 +226,98 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
                         Text.of("Keybind profile cleared for " + className)
                 );
             });
+        }
+    }
+
+    /**
+     * Exports a keybind profile as an encoded string
+     * @param className The class name to export
+     * @return The encoded profile string with "CKP_" prefix, or null if profile doesn't exist
+     */
+    public static String exportProfile(String className) {
+        Map<String, String> profile = config.getProfile(className);
+        if (profile == null || profile.isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Create a wrapper object that includes the class name
+            Map<String, Object> exportData = new HashMap<>();
+            exportData.put("className", className);
+            exportData.put("keybinds", profile);
+
+            // Convert to JSON
+            Gson gson = new Gson();
+            String json = gson.toJson(exportData);
+
+            // Encode to Base64
+            String encoded = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+
+            // Add prefix for validation
+            return "CKP_" + encoded;
+        } catch (Exception e) {
+            LOGGER.error("Failed to export profile for " + className, e);
+            return null;
+        }
+    }
+
+    /**
+     * Imports a keybind profile from an encoded string
+     * @param code The encoded profile string
+     * @return The class name of the imported profile, or null if import failed
+     */
+    public static String importProfile(String code) {
+        try {
+            // Validate prefix
+            if (!code.startsWith("CKP_")) {
+                LOGGER.error("Invalid profile code: missing CKP_ prefix");
+                return null;
+            }
+
+            // Remove prefix
+            String encoded = code.substring(4);
+
+            // Decode from Base64
+            byte[] decoded = Base64.getDecoder().decode(encoded);
+            String json = new String(decoded, StandardCharsets.UTF_8);
+
+            // Parse JSON
+            Gson gson = new Gson();
+            Type type = new TypeToken<Map<String, Object>>(){}.getType();
+            Map<String, Object> exportData = gson.fromJson(json, type);
+
+            // Extract class name and keybinds
+            String className = (String) exportData.get("className");
+            if (className == null) {
+                LOGGER.error("Invalid profile code: missing className");
+                return null;
+            }
+
+            // Convert keybinds (Gson might parse as Map<String, Object>)
+            Object keybindsObj = exportData.get("keybinds");
+            if (keybindsObj == null) {
+                LOGGER.error("Invalid profile code: missing keybinds");
+                return null;
+            }
+
+            Map<String, String> keybinds = new HashMap<>();
+            if (keybindsObj instanceof Map) {
+                Map<?, ?> keybindsMap = (Map<?, ?>) keybindsObj;
+                for (Map.Entry<?, ?> entry : keybindsMap.entrySet()) {
+                    keybinds.put(entry.getKey().toString(), entry.getValue().toString());
+                }
+            }
+
+            // Save the profile
+            config.saveProfile(className, keybinds);
+            saveConfig();
+
+            LOGGER.info("Imported keybind profile for " + className + " with " + keybinds.size() + " keybinds");
+            return className;
+
+        } catch (Exception e) {
+            LOGGER.error("Failed to import profile", e);
+            return null;
         }
     }
 }

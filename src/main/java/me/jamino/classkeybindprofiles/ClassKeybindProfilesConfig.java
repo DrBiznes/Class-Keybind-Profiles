@@ -14,7 +14,13 @@ public class ClassKeybindProfilesConfig implements ConfigData {
     private Map<String, Map<String, String>> profiles = new HashMap<>();
 
     @ConfigEntry.Gui.Tooltip
-    private boolean disableToastNotifications = false;
+    private boolean disableSaveToastNotifications = false;
+
+    @ConfigEntry.Gui.Tooltip
+    private boolean disableUpdateToastNotifications = false;
+
+    @ConfigEntry.Gui.Tooltip
+    private boolean autoSaveOnClassChange = true;
 
     public void saveProfile(String className, Map<String, String> keybinds) {
         profiles.put(className, new HashMap<>(keybinds));
@@ -28,12 +34,28 @@ public class ClassKeybindProfilesConfig implements ConfigData {
         return new HashMap<>(profiles);
     }
 
-    public boolean isToastNotificationsDisabled() {
-        return disableToastNotifications;
+    public boolean isSaveToastNotificationsDisabled() {
+        return disableSaveToastNotifications;
     }
 
-    public void setDisableToastNotifications(boolean disableToastNotifications) {
-        this.disableToastNotifications = disableToastNotifications;
+    public void setDisableSaveToastNotifications(boolean disableSaveToastNotifications) {
+        this.disableSaveToastNotifications = disableSaveToastNotifications;
+    }
+
+    public boolean isUpdateToastNotificationsDisabled() {
+        return disableUpdateToastNotifications;
+    }
+
+    public void setDisableUpdateToastNotifications(boolean disableUpdateToastNotifications) {
+        this.disableUpdateToastNotifications = disableUpdateToastNotifications;
+    }
+
+    public boolean isAutoSaveOnClassChange() {
+        return autoSaveOnClassChange;
+    }
+
+    public void setAutoSaveOnClassChange(boolean autoSaveOnClassChange) {
+        this.autoSaveOnClassChange = autoSaveOnClassChange;
     }
 
     public void clearProfile(String className) {

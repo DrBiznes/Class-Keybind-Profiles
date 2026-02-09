@@ -52,10 +52,25 @@ public class ClassKeybindProfilesScreen {
         // Add the "Config" category
         ConfigCategory configCategory = builder.getOrCreateCategory(Text.of("Config"));
 
-        // Add option to disable toast notifications
-        configCategory.addEntry(entryBuilder.startBooleanToggle(Text.of("Disable Toast Notifications"), ClassKeybindProfiles.config.isToastNotificationsDisabled())
+        // Add option to disable save toast notifications
+        configCategory.addEntry(entryBuilder.startBooleanToggle(Text.of("Disable Profile Save Toasts"), ClassKeybindProfiles.config.isSaveToastNotificationsDisabled())
                 .setDefaultValue(false)
-                .setSaveConsumer(ClassKeybindProfiles.config::setDisableToastNotifications)
+                .setTooltip(Text.of("Disables toasts when saving/auto-saving profiles"))
+                .setSaveConsumer(ClassKeybindProfiles.config::setDisableSaveToastNotifications)
+                .build());
+
+        // Add option to disable update toast notifications
+        configCategory.addEntry(entryBuilder.startBooleanToggle(Text.of("Disable Profile Update Toasts"), ClassKeybindProfiles.config.isUpdateToastNotificationsDisabled())
+                .setDefaultValue(false)
+                .setTooltip(Text.of("Disables toasts when switching classes and loading profiles"))
+                .setSaveConsumer(ClassKeybindProfiles.config::setDisableUpdateToastNotifications)
+                .build());
+
+        // Add option for auto-save
+        configCategory.addEntry(entryBuilder.startBooleanToggle(Text.of("Auto-save on Class Change"), ClassKeybindProfiles.config.isAutoSaveOnClassChange())
+                .setDefaultValue(true)
+                .setTooltip(Text.of("Automatically saves keybinds when switching classes"))
+                .setSaveConsumer(ClassKeybindProfiles.config::setAutoSaveOnClassChange)
                 .build());
 
         // Add clear profile buttons for each class type
