@@ -81,7 +81,11 @@ public class ClassKeybindProfilesCommands {
 
         for (Map<String, String> profile : profiles.values()) {
             for (String key : profile.keySet()) {
-                if (key.startsWith("Cast ")) {
+                if (key.equals("wynntils.keybind.castFirstSpell") ||
+                        key.equals("wynntils.keybind.castSecondSpell") ||
+                        key.equals("wynntils.keybind.castThirdSpell") ||
+                        key.equals("wynntils.keybind.castFourthSpell") ||
+                        key.equals("wynntils.keybind.castMeleeAttack")) {
                     hasWynntils = true;
                     wynntilsCount++;
                 } else if (key.startsWith("key.wynncraft-spell-caster")) {

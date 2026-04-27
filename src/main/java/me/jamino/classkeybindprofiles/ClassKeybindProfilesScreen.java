@@ -22,10 +22,11 @@ public class ClassKeybindProfilesScreen {
 
     static {
         // Wynntils friendly names (updated with correct keys)
-        WYNNTILS_NAMES.put("Cast 1st Spell", "Cast 1st Spell");
-        WYNNTILS_NAMES.put("Cast 2nd Spell", "Cast 2nd Spell");
-        WYNNTILS_NAMES.put("Cast 3rd Spell", "Cast 3rd Spell");
-        WYNNTILS_NAMES.put("Cast 4th Spell", "Cast 4th Spell");
+        WYNNTILS_NAMES.put("wynntils.keybind.castFirstSpell", "Cast 1st Spell");
+        WYNNTILS_NAMES.put("wynntils.keybind.castSecondSpell", "Cast 2nd Spell");
+        WYNNTILS_NAMES.put("wynntils.keybind.castThirdSpell", "Cast 3rd Spell");
+        WYNNTILS_NAMES.put("wynntils.keybind.castFourthSpell", "Cast 4th Spell");
+        WYNNTILS_NAMES.put("wynntils.keybind.castMeleeAttack", "Cast Melee Attack");
 
         // Wynncraft Spell Caster friendly names
         WYNNCRAFT_SPELL_CASTER_NAMES.put("key.wynncraft-spell-caster.spell.first", "First Spell");
@@ -97,7 +98,11 @@ public class ClassKeybindProfilesScreen {
             if (currentProfile != null && !currentProfile.isEmpty()) {
                 // Group keybinds by mod type
                 Map<String, String> wynntilsKeybinds = currentProfile.entrySet().stream()
-                        .filter(entry -> entry.getKey().startsWith("Cast "))
+                        .filter(entry -> entry.getKey().equals("wynntils.keybind.castFirstSpell") ||
+                                entry.getKey().equals("wynntils.keybind.castSecondSpell") ||
+                                entry.getKey().equals("wynntils.keybind.castThirdSpell") ||
+                                entry.getKey().equals("wynntils.keybind.castFourthSpell") ||
+                                entry.getKey().equals("wynntils.keybind.castMeleeAttack"))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
                 Map<String, String> wynncraftKeybinds = currentProfile.entrySet().stream()

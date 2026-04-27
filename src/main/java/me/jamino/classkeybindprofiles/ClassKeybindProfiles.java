@@ -202,7 +202,11 @@ public class ClassKeybindProfiles implements ClientModInitializer, ModMenuApi {
                 .filter(kb -> {
                     String key = kb.getId();
                     return key.startsWith("key.wynncraft-spell-caster") ||
-                            key.startsWith("Cast ") ||  // Wynntils: "Cast 1st Spell", etc.
+                            key.equals("wynntils.keybind.castFirstSpell") ||
+                            key.equals("wynntils.keybind.castSecondSpell") ||
+                            key.equals("wynntils.keybind.castThirdSpell") ||
+                            key.equals("wynntils.keybind.castFourthSpell") ||
+                            key.equals("wynntils.keybind.castMeleeAttack") ||
                             key.startsWith("key.ktnwynnmacros");  // Fixed: BetterWynnMacros uses "key.ktnwynnmacros", not "key_key.ktnwynnmacros"
                 })
                 .collect(Collectors.toMap(
